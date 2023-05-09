@@ -19,9 +19,7 @@ async function main() {
     console.log("Account balance:", (await deployer.getBalance()).toString());
   
     const AWARD = await ethers.getContractFactory("AWARD");
-    const upgradeProxy = await upgrades.upgradeProxy("0x5022EDB8b3561Ce5201E3A022a316021F1448B08", AWARD);
-    // const token = await PIZZA.deploy();
-    // await token.deployed();
+    const upgradeProxy = await upgrades.upgradeProxy("0x9bc33ADAee59CE9eE41fD988145e2ae679ae74eC", AWARD);
   
     console.log("Token address:", upgradeProxy.address);
   }

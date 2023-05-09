@@ -23,3 +23,4 @@ artifacts
 abi
 package-lock.json
 yarn.lock
+bytecode

@@ -124,14 +124,13 @@ const {
 
         // await hardhatToken.setCacheAddress(addr1.address);
         let userAddrs = [addr2.address,addr3.address];
-        let rates = [10,90];
-        await hardhatToken.award(userAddrs,rates);
+        await hardhatToken.award(userAddrs,1);
 
         const contractBalance3 = await ethers.provider.getBalance(addr2.address)
         console.log("addr2 balance:%s",contractBalance3);
         const contractBalance4 = await ethers.provider.getBalance(addr3.address)
         console.log("addr3 balance:%s",contractBalance4);
-        const cycle = await hardhatToken.cycle();
+        const cycle = await hardhatToken.cycle() - 1;
         console.log("cycle:%s",cycle);
         const awardMap = await hardhatToken.awardMap(cycle);
         console.log("token balance:%s",awardMap);
@@ -169,8 +168,7 @@ const {
 
         // await hardhatToken.setCacheAddress(addr1.address);
         let userAddrs = [addr2.address,addr3.address];
-        let rates = [10,90];
-        await hardhatToken.award(userAddrs,rates);
+        await hardhatToken.award(userAddrs,2);
 
         const contractBalance3 = await ethers.provider.getBalance(addr2.address)
         console.log("addr2  balance:%s",contractBalance3);

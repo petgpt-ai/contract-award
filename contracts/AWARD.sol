@@ -13,7 +13,7 @@ contract AWARD is Initializable, OwnableUpgradeable   {
     uint256 public perServiceCharge;
     uint256 public sumServiceCharge;
     mapping(uint256 => uint256) public awardMap;
-    mapping(uint => uint) public rankMap;
+    mapping(uint => uint256) public rankMap;
 
     function initialize() public initializer  {        
         __Ownable_init();
@@ -65,7 +65,7 @@ contract AWARD is Initializable, OwnableUpgradeable   {
         uint256 sumPerAmount = 0;
         for(uint i=0;i<userAddrs.length;i++){
             uint rankNumber = i + 1;
-            uint rankRate = rankMap[rankNumber];
+            uint256 rankRate = rankMap[rankNumber];
             require(rankRate > 0,"rate is 0");
             address[] calldata tmpUserAddrs = userAddrs[i];
             uint256 sumAmount = 0;

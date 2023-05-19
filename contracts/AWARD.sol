@@ -7,7 +7,7 @@ import "hardhat/console.sol";
 
 contract AWARD is Initializable, OwnableUpgradeable   {
     uint public cycle;
-    uint public awardSize;
+    uint public awardRankSize;
     uint256 public cycleAwardBlockNumber;
     uint256 public startAwardBlockNumber;
     uint256 public perServiceCharge;
@@ -18,7 +18,7 @@ contract AWARD is Initializable, OwnableUpgradeable   {
     function initialize() public initializer  {        
         __Ownable_init();
         cycle = 0;
-        awardSize = 100;
+        awardRankSize = 5;
         cycleAwardBlockNumber = 0;
         startAwardBlockNumber = 0;
         sumServiceCharge = 0;
@@ -34,9 +34,9 @@ contract AWARD is Initializable, OwnableUpgradeable   {
         require(perServiceCharge != 0, "service charge number not 0");
         perServiceCharge = charge;
     }
-    function setAwardSize(uint inAwardSize)public onlyOwner{
-        require(inAwardSize != 0, "award size number not 0");
-        awardSize = inAwardSize;
+    function setAwardRankSize(uint inAwardRankSize)public onlyOwner{
+        require(inAwardRankSize != 0, "award size number not 0");
+        awardRankSize = inAwardRankSize;
     }
 
     function setStartAwardBlockNumber(uint256 blockNumber)public onlyOwner{
@@ -51,9 +51,9 @@ contract AWARD is Initializable, OwnableUpgradeable   {
         cycleAwardBlockNumber = blockNumber;
     }
     /*加入名次对应百分比 转账给owner */
-    function award(address[] calldata userAddrs,uint rankNumber)public onlyOwner{
+    function award(address[][] calldata userAddrs)public onlyOwner{
         require(userAddrs.length > 0,"user address length is 0");
-        require(userAddrs.length < awardSize,"awards not over num");
+        require(userAddrs.length == awardRankSize,"awards not award rank size");
 
         address contractsAddress = address(this);
         uint256 balance = contractsAddress.balance;
@@ -62,24 +62,41 @@ contract AWARD is Initializable, OwnableUpgradeable   {
         require(receiveAwardValue != 0, "receive award is 0");
         require(balance >= receiveAwardValue, "balance < award amount");
         
-        require(rankNumber > 0,"rank is 0");
-        require(rankNumber < 6,"rank over 5");
-        uint rankRate = rankMap[rankNumber];
-        require(rankRate > 0,"rate is 0");
-        uint256 sumAmount = 0;
-        uint256 perAmount = 0;
-        unchecked {
-            sumAmount = receiveAwardValue * rankRate / 100;
-            perAmount = sumAmount / userAddrs.length;
-        }
-        require(sumAmount > 0,"sumAmount is 0");
-        require(perAmount > 0,"perAmount is 0");
-
+        uint256 sumPerAmount = 0;
         for(uint i=0;i<userAddrs.length;i++){
-            address userAddr = userAddrs[i];
-            require(userAddr != address(0), "award from the zero address");
-            payable(userAddr).transfer(perAmount);
+            uint rankNumber = i + 1;
+            uint rankRate = rankMap[rankNumber];
+            require(rankRate > 0,"rate is 0");
+            address[] calldata tmpUserAddrs = userAddrs[i];
+            uint256 sumAmount = 0;
+            uint256 perAmount = 0;
+            
+            unchecked {
+                sumAmount = receiveAwardValue / 100 * rankRate ;
+                sumPerAmount += sumAmount;
+            }
+            if(tmpUserAddrs.length > 0){
+                unchecked {
+                    perAmount = sumAmount / tmpUserAddrs.length;
+                }
+                require(sumAmount > 0,"sumAmount is 0");
+                require(perAmount > 0,"perAmount is 0");
+                console.log("award:%d rank:%d sum:%d per:%d",receiveAwardValue,sumPerAmount,sumAmount);
+            }else{
+                console.log("award:%d rank:%d sum:%d per:%d",receiveAwardValue,sumPerAmount,sumAmount);
+                continue;
+            }
+            
+            
+            
+            for(uint j=0;j<tmpUserAddrs.length;j++){
+                address userAddr = tmpUserAddrs[j];
+                require(userAddr != address(0), "award from the zero address");
+                payable(userAddr).transfer(perAmount);
+            }
         }
+        
+        
         /* 转手续费到创建者 */
         address ownerAddr = owner(); 
         payable(ownerAddr).transfer(sumServiceCharge);

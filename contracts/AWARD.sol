@@ -62,7 +62,6 @@ contract AWARD is Initializable, OwnableUpgradeable   {
         require(receiveAwardValue != 0, "receive award is 0");
         require(balance >= receiveAwardValue, "balance < award amount");
         
-        uint256 sumPerAmount = 0;
         for(uint i=0;i<userAddrs.length;i++){
             uint rankNumber = i + 1;
             uint256 rankRate = rankMap[rankNumber];
@@ -70,24 +69,18 @@ contract AWARD is Initializable, OwnableUpgradeable   {
             address[] calldata tmpUserAddrs = userAddrs[i];
             uint256 sumAmount = 0;
             uint256 perAmount = 0;
-            
-            unchecked {
-                sumAmount = receiveAwardValue / 100 * rankRate ;
-                sumPerAmount += sumAmount;
-            }
             if(tmpUserAddrs.length > 0){
                 unchecked {
+                    sumAmount = receiveAwardValue / 100 * rankRate ;
                     perAmount = sumAmount / tmpUserAddrs.length;
                 }
                 require(sumAmount > 0,"sumAmount is 0");
                 require(perAmount > 0,"perAmount is 0");
-                console.log("award:%d rank:%d sum:%d per:%d",receiveAwardValue,sumPerAmount,sumAmount);
+                // console.log("rank:%ld sum:%ld per:%ld",rankRate,sumAmount,perAmount);
             }else{
-                console.log("award:%d rank:%d sum:%d per:%d",receiveAwardValue,sumPerAmount,sumAmount);
+                // console.log("rank:%ld sum:%ld per:%ld",rankRate,sumAmount,perAmount);
                 continue;
             }
-            
-            
             
             for(uint j=0;j<tmpUserAddrs.length;j++){
                 address userAddr = tmpUserAddrs[j];

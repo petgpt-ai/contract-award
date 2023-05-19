@@ -10,7 +10,7 @@ const {
       // Get the ContractFactory and Signers here.
       const Token = await ethers.getContractFactory("AWARD");
       
-      const [owner, addr1, addr2,addr3] = await ethers.getSigners();
+      const [owner, addr1, addr2,addr3,addr4,addr5] = await ethers.getSigners();
   
       // To deploy our contract, we just have to call Token.deploy() and await
       // for it to be deployed(), which happens onces its transaction has been
@@ -18,7 +18,7 @@ const {
       const hardhatToken = await upgrades.deployProxy(Token,[],{initializer: 'initialize'})
       await hardhatToken.deployed();
       // Fixtures can return anything you consider useful for your tests
-      return { Token, hardhatToken, owner, addr1, addr2,addr3 };
+      return { Token, hardhatToken, owner, addr1, addr2,addr3,addr4,addr5 };
     }
     
     describe("Deployment", function () {
@@ -96,7 +96,7 @@ const {
         });
       });
       it("award1", async function () {
-        const { hardhatToken, owner, addr1, addr2,addr3 } = await loadFixture(deployTokenFixture);
+        const { hardhatToken, owner, addr1, addr2,addr3,addr4,addr5 } = await loadFixture(deployTokenFixture);
         // console.log("token address:%s",hardhatToken.address);
         const ownerBalance = await ethers.provider.getBalance(owner.address)
         // console.log("owner balance:%s",ownerBalance);
@@ -123,7 +123,7 @@ const {
         console.log("token balance:%s",contractBalance2);
 
         // await hardhatToken.setCacheAddress(addr1.address);
-        let userAddrs = [[addr2.address,addr3.address],[],[],[],[]];
+        let userAddrs = [[addr2.address,addr3.address],[addr4.address,addr5.address],[],[],[]];
         await hardhatToken.award(userAddrs);
 
         const contractBalance3 = await ethers.provider.getBalance(addr2.address)

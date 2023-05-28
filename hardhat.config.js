@@ -18,25 +18,16 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 //0x91D1B74421Bdd3030d44d5AFfdAe6279C4F8962b
 module.exports = {
   networks: {
-    cfx:{
-      url:""
-    },
-    alfajores: {
-      url: "https://alfajores-forno.celo-testnet.org",
-      chainId: 44787
-    },
     goerli: {
-      url: "https://goerli.infura.io/v3/a8bd8f6354ff4900b1f319a7e2c737b9",
-      accounts: ["6e3a4288130c72b420c4984034f9a7f343a985e3acd1114f0fc737af336fda3b"]
-    },
-    sepolia:{
-      url: "https://sepolia.infura.io/v3/a8bd8f6354ff4900b1f319a7e2c737b9",
-      accounts: ["6e3a4288130c72b420c4984034f9a7f343a985e3acd1114f0fc737af336fda3b"]
+      url: "https://arbitrum-goerli.infura.io/v3/4dc1418732704759aa363de02c17ca67",
+      accounts: ["dc0e179b950ef6d8a1dd78ddb256de40da1544c236eb0e96e42c1df28780c04f"]
     }
 
   },
   etherscan: {
-    apiKey: ""
+    apiKey: {
+      arbitrumGoerli: 'Y74DTT9PAC3ZMXTS88J5IVKD6JME35Z2VT'
+    }
   },
   solidity: "0.8.9"
 }

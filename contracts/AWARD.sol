@@ -10,8 +10,6 @@ contract AWARD is Initializable, OwnableUpgradeable   {
     uint public awardRankSize;
     uint256 public cycleAwardBlockNumber;
     uint256 public startAwardBlockNumber;
-    uint256 public perServiceCharge;
-    uint256 public sumServiceCharge;
     mapping(uint256 => uint256) public awardMap;
     mapping(uint => uint256) public rankMap;
 
@@ -21,8 +19,6 @@ contract AWARD is Initializable, OwnableUpgradeable   {
         awardRankSize = 5;
         cycleAwardBlockNumber = 0;
         startAwardBlockNumber = 0;
-        sumServiceCharge = 0;
-        perServiceCharge = 1000; //设置每笔手续费
         rankMap[1] = 35;
         rankMap[2] = 25;
         rankMap[3] = 20;
@@ -30,10 +26,7 @@ contract AWARD is Initializable, OwnableUpgradeable   {
         rankMap[5] = 10;
     }
 
-    function setPerServiceCharge(uint charge)public onlyOwner{
-        require(perServiceCharge != 0, "service charge number not 0");
-        perServiceCharge = charge;
-    }
+
     function setAwardRankSize(uint inAwardRankSize)public onlyOwner{
         require(inAwardRankSize != 0, "award size number not 0");
         awardRankSize = inAwardRankSize;
@@ -90,10 +83,9 @@ contract AWARD is Initializable, OwnableUpgradeable   {
         }
         
         
-        /* 转手续费到创建者 */
-        address ownerAddr = owner(); 
-        payable(ownerAddr).transfer(sumServiceCharge);
-        sumServiceCharge = 0;
+        // /* 转手续费到创建者 */
+        // address ownerAddr = owner(); 
+        // payable(ownerAddr).transfer(sumServiceCharge);
         cycle += 1;
     }
 
@@ -105,14 +97,12 @@ contract AWARD is Initializable, OwnableUpgradeable   {
 
     receive() payable external {
         require(msg.value >= 0, "receive is 0");
-        require(msg.value >= perServiceCharge, "transfer value less service charge");
         if(startAwardBlockNumber == 0||cycleAwardBlockNumber ==0){
-            awardMap[cycle] += msg.value - perServiceCharge;
+            awardMap[cycle] += msg.value ;
         }else{
             uint256 tmpAwardBlockNumber = block.number - startAwardBlockNumber;
             uint256 cycleNum = tmpAwardBlockNumber / cycleAwardBlockNumber;
-            awardMap[cycleNum] += msg.value - perServiceCharge;
+            awardMap[cycleNum] += msg.value;
         }
-        sumServiceCharge += perServiceCharge;
     }
 }

@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.8;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+// import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+// import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "hardhat/console.sol";
 
-contract AWARD is Initializable, OwnableUpgradeable   {
+contract AWARD is  Ownable   {
     uint public cycle;
     uint public awardRankSize;
     uint256 public cycleAwardBlockNumber;
@@ -13,8 +14,8 @@ contract AWARD is Initializable, OwnableUpgradeable   {
     mapping(uint256 => uint256) public awardMap;
     mapping(uint => uint256) public rankMap;
 
-    function initialize() public initializer  {        
-        __Ownable_init();
+    constructor() {      
+        // __Ownable_init();
         cycle = 0;
         awardRankSize = 5;
         cycleAwardBlockNumber = 0;

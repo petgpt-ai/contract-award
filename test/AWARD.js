@@ -15,7 +15,7 @@ const {
       // To deploy our contract, we just have to call Token.deploy() and await
       // for it to be deployed(), which happens onces its transaction has been
       // mined.
-      const hardhatToken = await upgrades.deployProxy(Token,[],{initializer: 'initialize'})
+      const hardhatToken = await Token.deploy();
       await hardhatToken.deployed();
       // Fixtures can return anything you consider useful for your tests
       return { Token, hardhatToken, owner, addr1, addr2,addr3,addr4,addr5 };

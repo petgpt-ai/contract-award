@@ -19,7 +19,7 @@ async function main() {
     console.log("Account balance:", (await deployer.getBalance()).toString());
   
     const Token = await ethers.getContractFactory("AWARD");
-    const token = await upgrades.deployProxy(Token,[],{initializer: 'initialize'})
+    const token = await Token.deploy();
     await token.deployed();
   
     console.log("Token address:", token.address);

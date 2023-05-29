@@ -90,13 +90,13 @@ contract AWARD is  Ownable   {
         cycle += 1;
     }
 
-    function getContractsBalance()public view onlyOwner returns(uint256){
+    function getContractsBalance()public view virtual returns(uint256){
         address contractsAddress = address(this);
         uint256 balance = contractsAddress.balance;
         return balance;
     }
 
-    receive() payable external {
+    receive() external payable{
         require(msg.value >= 0, "receive is 0");
         if(startAwardBlockNumber == 0||cycleAwardBlockNumber ==0){
             awardMap[cycle] += msg.value ;
@@ -105,5 +105,14 @@ contract AWARD is  Ownable   {
             uint256 cycleNum = tmpAwardBlockNumber / cycleAwardBlockNumber;
             awardMap[cycleNum] += msg.value;
         }
+    }
+    
+    fallback() external payable{}
+
+    function withdraw() external onlyOwner {
+        (bool success, ) = payable(msg.sender).call{
+            value: address(this).balance
+        }("");
+        require(success, "Transfer failed.");
     }
 }

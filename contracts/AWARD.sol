@@ -27,7 +27,6 @@ contract AWARD is  Ownable   {
         rankMap[5] = 10;
     }
 
-
     function setAwardRankSize(uint inAwardRankSize)public onlyOwner{
         require(inAwardRankSize != 0, "award size number not 0");
         awardRankSize = inAwardRankSize;
@@ -44,7 +43,7 @@ contract AWARD is  Ownable   {
         require(blockNumber != 0, "award block number not 0");
         cycleAwardBlockNumber = blockNumber;
     }
-    /*加入名次对应百分比 转账给owner */
+
     function award(address[][] calldata userAddrs)public onlyOwner{
         require(userAddrs.length > 0,"user address length is 0");
         require(userAddrs.length == awardRankSize,"awards not award rank size");
@@ -82,11 +81,6 @@ contract AWARD is  Ownable   {
                 payable(userAddr).transfer(perAmount);
             }
         }
-        
-        
-        // /* 转手续费到创建者 */
-        // address ownerAddr = owner(); 
-        // payable(ownerAddr).transfer(sumServiceCharge);
         cycle += 1;
     }
 
@@ -96,17 +90,24 @@ contract AWARD is  Ownable   {
         return balance;
     }
 
+    function getBlockNumber()public view returns(uint256){
+        return block.number;
+    }
+
     receive() external payable{
         require(msg.value >= 0, "receive is 0");
         if(startAwardBlockNumber == 0||cycleAwardBlockNumber ==0){
             awardMap[cycle] += msg.value ;
         }else{
             uint256 tmpAwardBlockNumber = block.number - startAwardBlockNumber;
+            if(tmpAwardBlockNumber < 0){
+                return;
+            }
             uint256 cycleNum = tmpAwardBlockNumber / cycleAwardBlockNumber;
             awardMap[cycleNum] += msg.value;
         }
     }
-    
+
     fallback() external payable{}
 
     function withdraw() external onlyOwner {

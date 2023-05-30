@@ -35,7 +35,7 @@ contract AWARD is  Ownable   {
     function setStartAwardBlockNumber(uint256 blockNumber)public onlyOwner{
         require(blockNumber != 0, "award block number not 0");
         // console.log("b:%d b:%d",blockNumber,block.number);
-        require(blockNumber > block.number, "award block <= cur block number");
+        // require(blockNumber > block.number, "award block <= cur block number");
         startAwardBlockNumber = blockNumber;
     }
 
@@ -46,7 +46,7 @@ contract AWARD is  Ownable   {
 
     function award(address[][] calldata userAddrs)public onlyOwner{
         require(userAddrs.length > 0,"user address length is 0");
-        require(userAddrs.length == awardRankSize,"awards not award rank size");
+        require(userAddrs.length <= awardRankSize,"awards not award rank size");
 
         address contractsAddress = address(this);
         uint256 balance = contractsAddress.balance;

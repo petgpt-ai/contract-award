@@ -45,14 +45,21 @@ contract AWARD is  Ownable   {
     }
 
     function award(address[][] calldata userAddrs)public onlyOwner{
-        require(userAddrs.length > 0,"user address length is 0");
         require(userAddrs.length <= awardRankSize,"awards not award rank size");
+        require(startAwardBlockNumber > 0 ,"startAwardBlockNumber is 0");
+        require(cycleAwardBlockNumber > 0 ,"cycleAwardBlockNumber is 0");
+        // console.log("%d %d %d",block.number,startAwardBlockNumber,cycleAwardBlockNumber);
+        require(block.number >= startAwardBlockNumber + (cycle +1) * cycleAwardBlockNumber,"awards block not reach");
 
         address contractsAddress = address(this);
         uint256 balance = contractsAddress.balance;
         require(balance != 0, "address balance is 0");
         uint256 receiveAwardValue = awardMap[cycle];
-        require(receiveAwardValue != 0, "receive award is 0");
+        if(receiveAwardValue == 0 || userAddrs.length == 0){
+            awardMap[cycle] = 0;
+            cycle += 1;
+            return;
+        }
         require(balance >= receiveAwardValue, "balance < award amount");
         
         for(uint i=0;i<userAddrs.length;i++){
@@ -104,6 +111,7 @@ contract AWARD is  Ownable   {
                 return;
             }
             uint256 cycleNum = tmpAwardBlockNumber / cycleAwardBlockNumber;
+            // console.log("recv:%d val:%d t:%d",cycleNum,msg.value,tmpAwardBlockNumber);
             awardMap[cycleNum] += msg.value;
         }
     }

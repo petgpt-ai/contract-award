@@ -205,6 +205,12 @@ const {
         const balance = await hardhatToken.getContractsBalance();
         console.log("balance:%s",balance);
       });
+      it("cycle", async function () {
+        const { hardhatToken, owner, addr1, addr2,addr3 } = await loadFixture(deployTokenFixture);
+        await hardhatToken.setCycle(1);
+        let awardMap = await hardhatToken.awardMap(0);
+        console.log("cycle:0 reward:%d",awardMap);
+      });
     });
   });
   

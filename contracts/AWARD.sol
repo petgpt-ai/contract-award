@@ -26,6 +26,10 @@ contract AWARD is  Ownable   {
         rankMap[4] = 10;
         rankMap[5] = 10;
     }
+    function setCycle(uint inCycle)public onlyOwner{
+        require(inCycle != 0, "cycle number not 0");
+        cycle = inCycle;
+    }
 
     function setAwardRankSize(uint inAwardRankSize)public onlyOwner{
         require(inAwardRankSize != 0, "award size number not 0");

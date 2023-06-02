@@ -55,15 +55,15 @@ contract AWARD is  Ownable   {
         // console.log("%d %d %d",block.number,startAwardBlockNumber,cycleAwardBlockNumber);
         require(block.number >= startAwardBlockNumber + (cycle +1) * cycleAwardBlockNumber,"awards block not reach");
 
-        address contractsAddress = address(this);
-        uint256 balance = contractsAddress.balance;
-        require(balance != 0, "address balance is 0");
         uint256 receiveAwardValue = awardMap[cycle];
         if(receiveAwardValue == 0 || userAddrs.length == 0){
             awardMap[cycle] = 0;
             cycle += 1;
             return;
         }
+        address contractsAddress = address(this);
+        uint256 balance = contractsAddress.balance;
+        require(balance != 0, "address balance is 0");
         require(balance >= receiveAwardValue, "balance < award amount");
         
         for(uint i=0;i<userAddrs.length;i++){
@@ -103,6 +103,15 @@ contract AWARD is  Ownable   {
 
     function getBlockNumber()public view returns(uint256){
         return block.number;
+    }
+    
+    function getCurCycleByBlockNumber()public view returns(uint256){
+        uint256 tmpAwardBlockNumber = block.number - startAwardBlockNumber; 
+        if(tmpAwardBlockNumber < 0){
+            return 0;
+        }
+        uint256 cycleNum = tmpAwardBlockNumber / cycleAwardBlockNumber;
+        return cycleNum;
     }
 
     receive() external payable{

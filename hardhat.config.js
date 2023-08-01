@@ -16,6 +16,7 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 });
 
 //0x91D1B74421Bdd3030d44d5AFfdAe6279C4F8962b
+//0x7f5D656f3ACb0ccB7f46016f111658477e4cc371
 module.exports = {
   networks: {
     goerli: {

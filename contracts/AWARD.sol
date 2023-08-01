@@ -4,6 +4,7 @@ pragma solidity ^0.8.8;
 // import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 // import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "hardhat/console.sol";
 
 contract AWARD is  Ownable   {
@@ -12,7 +13,8 @@ contract AWARD is  Ownable   {
     uint256 public cycleAwardBlockNumber;
     uint256 public startAwardBlockNumber;
     mapping(uint256 => uint256) public awardMap;
-    mapping(uint => uint256) public rankMap;
+    mapping(uint => bytes32) public merkleRootMap;
+    mapping(uint => mapping(uint => uint256)) public catAwardMap;
 
     constructor() {      
         // __Ownable_init();
@@ -20,11 +22,6 @@ contract AWARD is  Ownable   {
         awardRankSize = 5;
         cycleAwardBlockNumber = 0;
         startAwardBlockNumber = 0;
-        rankMap[1] = 35;
-        rankMap[2] = 25;
-        rankMap[3] = 20;
-        rankMap[4] = 10;
-        rankMap[5] = 10;
     }
     function setCycle(uint inCycle)public onlyOwner{
         require(inCycle != 0, "cycle number not 0");
@@ -48,52 +45,31 @@ contract AWARD is  Ownable   {
         cycleAwardBlockNumber = blockNumber;
     }
 
-    function award(address[][] calldata userAddrs)public onlyOwner{
-        require(userAddrs.length <= awardRankSize,"awards not award rank size");
+    function score(bytes32 tmerkleRoot)public onlyOwner{
         require(startAwardBlockNumber > 0 ,"startAwardBlockNumber is 0");
         require(cycleAwardBlockNumber > 0 ,"cycleAwardBlockNumber is 0");
         // console.log("%d %d %d",block.number,startAwardBlockNumber,cycleAwardBlockNumber);
         require(block.number >= startAwardBlockNumber + (cycle +1) * cycleAwardBlockNumber,"awards block not reach");
-
-        uint256 receiveAwardValue = awardMap[cycle];
-        if(receiveAwardValue == 0 || userAddrs.length == 0){
-            awardMap[cycle] = 0;
-            cycle += 1;
-            return;
-        }
-        address contractsAddress = address(this);
-        uint256 balance = contractsAddress.balance;
-        require(balance != 0, "address balance is 0");
-        require(balance >= receiveAwardValue, "balance < award amount");
-        
-        for(uint i=0;i<userAddrs.length;i++){
-            uint rankNumber = i + 1;
-            uint256 rankRate = rankMap[rankNumber];
-            require(rankRate > 0,"rate is 0");
-            address[] calldata tmpUserAddrs = userAddrs[i];
-            uint256 sumAmount = 0;
-            uint256 perAmount = 0;
-            if(tmpUserAddrs.length > 0){
-                unchecked {
-                    sumAmount = receiveAwardValue / 100 * rankRate ;
-                    perAmount = sumAmount / tmpUserAddrs.length;
-                }
-                require(sumAmount > 0,"sumAmount is 0");
-                require(perAmount > 0,"perAmount is 0");
-                // console.log("rank:%ld sum:%ld per:%ld",rankRate,sumAmount,perAmount);
-            }else{
-                // console.log("rank:%ld sum:%ld per:%ld",rankRate,sumAmount,perAmount);
-                continue;
-            }
-            
-            for(uint j=0;j<tmpUserAddrs.length;j++){
-                address userAddr = tmpUserAddrs[j];
-                require(userAddr != address(0), "award from the zero address");
-                payable(userAddr).transfer(perAmount);
-            }
-        }
+        merkleRootMap[cycle] = tmerkleRoot;
         cycle += 1;
     }
+
+    function claim(uint catId,uint256 amount,bytes32[] memory proof)public{
+        uint curCycle = cycle-1;
+        bytes32 merkleRoot_ = merkleRootMap[curCycle];
+        bytes32 leaf = keccak256(abi.encodePacked(msg.sender, catId, amount));
+        if (MerkleProof.verify(proof, merkleRoot_, leaf) && catAwardMap[curCycle][catId] == 0){
+            uint256 receiveAwardValue = awardMap[curCycle];
+            address contractsAddress = address(this);
+            uint256 balance = contractsAddress.balance;
+            require(balance != 0, "address balance is 0");
+            require(balance >= receiveAwardValue, "balance < award amount");
+
+            payable(msg.sender).transfer(amount);
+            catAwardMap[curCycle][catId] = amount;
+        }
+    }
+    
 
     function getContractsBalance()public view virtual returns(uint256){
         address contractsAddress = address(this);

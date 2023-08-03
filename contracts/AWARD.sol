@@ -58,7 +58,8 @@ contract AWARD is  Ownable   {
         uint curCycle = cycle-1;
         bytes32 merkleRoot_ = merkleRootMap[curCycle];
         bytes32 leaf = keccak256(abi.encodePacked(msg.sender, catId, amount));
-        if (MerkleProof.verify(proof, merkleRoot_, leaf) && catAwardMap[curCycle][catId] == 0){
+        uint256 awardAmount = catAwardMap[curCycle][catId];
+        if (MerkleProof.verify(proof, merkleRoot_, leaf) && awardAmount == 0){
             uint256 receiveAwardValue = awardMap[curCycle];
             address contractsAddress = address(this);
             uint256 balance = contractsAddress.balance;

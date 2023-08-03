@@ -103,122 +103,149 @@ const {
           value: ethers.utils.parseEther("1.0"), // Sends exactly 1.0 ether
         });
       });
-      it("award0", async function () {
+      it("score",async function () {
+        
+
         const { hardhatToken, owner, addr1, addr2,addr3,addr4,addr5 } = await loadFixture(deployTokenFixture);
+
+        leafNodes =[];
+        const addr1Str = addr1.address
+        const addr2Str = addr2.address
+        leafNodes[0] = ethers.utils.solidityKeccak256( ['address', 'uint','uint256'], [addr1Str, 1,1])
+        leafNodes[1] = ethers.utils.solidityKeccak256( ['address', 'uint','uint256'], [addr2Str, 1,2])
+        // 生成树根
+        const tree = new (require('merkletreejs').MerkleTree)(leafNodes, require('keccak256'), {sortPairs: true});
+
         await hardhatToken.setStartAwardBlockNumber(1);
+        
         await hardhatToken.setCycleAwardBlockNumber(2);
-        const contractBalance = await ethers.provider.getBalance(hardhatToken.address)
+        const contractBalance = await ethers.provider.getBalance(hardhatToken.address);
         console.log("token balance:%s",contractBalance);
-        blockNum = await ethers.provider.getBlockNumber();
-        console.log("block:%d",blockNum)
-        let userAddrs = [[addr2.address,addr3.address],[addr4.address,addr5.address],[],[],[]];
-        await hardhatToken.award(userAddrs);
-        const cycle = await hardhatToken.cycle();
-        console.log("cycle:%s",cycle);
-        const awardMap = await hardhatToken.awardMap(0);
-        console.log("awardMap 0:%s",awardMap);
-      });
-      it("award1", async function () {
-        const { hardhatToken, owner, addr1, addr2,addr3,addr4,addr5 } = await loadFixture(deployTokenFixture);
-        const signer = await ethers.provider.getSigner()
-        // console.log("token address:%s",hardhatToken.address);
-        const ownerBalance = await ethers.provider.getBalance(owner.address)
-        // console.log("owner balance:%s",ownerBalance);
+        // 
+        
+        const data = tree.getHexRoot();
+        await hardhatToken.score(data)
+        
+        const proof = tree.getHexProof(leafNodes[0])
+        console.log("proof:"+proof)
+        await hardhatToken.connect(addr1).claim(1,1,proof)
+      })
+      // it("award0", async function () {
+      //   const { hardhatToken, owner, addr1, addr2,addr3,addr4,addr5 } = await loadFixture(deployTokenFixture);
+      //   await hardhatToken.setStartAwardBlockNumber(1);
+      //   await hardhatToken.setCycleAwardBlockNumber(2);
+      //   const contractBalance = await ethers.provider.getBalance(hardhatToken.address)
+      //   console.log("token balance:%s",contractBalance);
+      //   blockNum = await ethers.provider.getBlockNumber();
+      //   console.log("block:%d",blockNum)
+      //   let userAddrs = [[addr2.address,addr3.address],[addr4.address,addr5.address],[],[],[]];
+      //   await hardhatToken.award(userAddrs);
+      //   const cycle = await hardhatToken.cycle();
+      //   console.log("cycle:%s",cycle);
+      //   const awardMap = await hardhatToken.awardMap(0);
+      //   console.log("awardMap 0:%s",awardMap);
+      // });
+      // it("award1", async function () {
+      //   const { hardhatToken, owner, addr1, addr2,addr3,addr4,addr5 } = await loadFixture(deployTokenFixture);
+      //   const signer = await ethers.provider.getSigner()
+      //   // console.log("token address:%s",hardhatToken.address);
+      //   const ownerBalance = await ethers.provider.getBalance(owner.address)
+      //   // console.log("owner balance:%s",ownerBalance);
 
 
-        const contractBalance1 = await ethers.provider.getBalance(hardhatToken.address)
-        // console.log("token balance1:%s",contractBalance1);
-        await ethers.provider.send("hardhat_setBalance", [
-          addr2.address,
-          "0x0",
-        ]);
-        await ethers.provider.send("hardhat_setBalance", [
-          addr3.address,
-          "0x0",
-        ]);
-        await ethers.provider.send("hardhat_setBalance", [
-          addr4.address,
-          "0x0",
-        ]);
-        await ethers.provider.send("hardhat_setBalance", [
-          addr5.address,
-          "0x0",
-        ]);
-        await hardhatToken.setStartAwardBlockNumber(1);
-        await hardhatToken.setCycleAwardBlockNumber(4);
-        // const transactionHash = await owner.sendTransaction({
-        //   to: hardhatToken.address,
-        //   value: ethers.utils.parseEther("1.0"), // Sends exactly 1.0 ether
-        // });
-        await transfer(owner.address,hardhatToken.address,signer,ethers.utils.parseEther("1.0"))
+      //   const contractBalance1 = await ethers.provider.getBalance(hardhatToken.address)
+      //   // console.log("token balance1:%s",contractBalance1);
+      //   await ethers.provider.send("hardhat_setBalance", [
+      //     addr2.address,
+      //     "0x0",
+      //   ]);
+      //   await ethers.provider.send("hardhat_setBalance", [
+      //     addr3.address,
+      //     "0x0",
+      //   ]);
+      //   await ethers.provider.send("hardhat_setBalance", [
+      //     addr4.address,
+      //     "0x0",
+      //   ]);
+      //   await ethers.provider.send("hardhat_setBalance", [
+      //     addr5.address,
+      //     "0x0",
+      //   ]);
+      //   await hardhatToken.setStartAwardBlockNumber(1);
+      //   await hardhatToken.setCycleAwardBlockNumber(4);
+      //   // const transactionHash = await owner.sendTransaction({
+      //   //   to: hardhatToken.address,
+      //   //   value: ethers.utils.parseEther("1.0"), // Sends exactly 1.0 ether
+      //   // });
+      //   await transfer(owner.address,hardhatToken.address,signer,ethers.utils.parseEther("1.0"))
 
-        const contractBalance = await ethers.provider.getBalance(hardhatToken.address)
-        console.log("token balance:%s",contractBalance);
-        // await hardhatToken.setCacheAddress(addr1.address);
-        let userAddrs = [[addr2.address,addr3.address],[addr4.address],[addr5.address],[],[]];
-        await hardhatToken.award(userAddrs);
+      //   const contractBalance = await ethers.provider.getBalance(hardhatToken.address)
+      //   console.log("token balance:%s",contractBalance);
+      //   // await hardhatToken.setCacheAddress(addr1.address);
+      //   let userAddrs = [[addr2.address,addr3.address],[addr4.address],[addr5.address],[],[]];
+      //   await hardhatToken.award(userAddrs);
 
-        const contractBalance2 = await ethers.provider.getBalance(addr2.address)
-        console.log("addr2 balance:%s",contractBalance2);
-        const contractBalance3 = await ethers.provider.getBalance(addr3.address)
-        console.log("addr3 balance:%s",contractBalance3);
-        const contractBalance4 = await ethers.provider.getBalance(addr4.address)
-        console.log("addr4 balance:%s",contractBalance4);
-        const contractBalance5 = await ethers.provider.getBalance(addr5.address)
-        console.log("addr5 balance:%s",contractBalance5);
-        const cycle = await hardhatToken.cycle() - 1;
-        console.log("cycle:%s",cycle);
-        const awardMap = await hardhatToken.awardMap(cycle);
-        console.log("token balance:%s",awardMap);
-      });
-      it("award2", async function () {
-        const { hardhatToken, owner, addr1, addr2,addr3 } = await loadFixture(deployTokenFixture);
-        const signer = await ethers.provider.getSigner()
-        await ethers.provider.send("hardhat_setBalance", [
-          addr2.address,
-          "0x0",
-        ]);
-        await ethers.provider.send("hardhat_setBalance", [
-          addr3.address,
-          "0x0",
-        ]);
-        await hardhatToken.setStartAwardBlockNumber(1);
-        await hardhatToken.setCycleAwardBlockNumber(4);
-        // let transactionHash = await owner.sendTransaction({
-        //   to: hardhatToken.address,
-        //   value: ethers.utils.parseEther("1.0"), // Sends exactly 1.0 ether
-        // });
-        // transactionHash = await owner.sendTransaction({
-        //   to: hardhatToken.address,
-        //   value: ethers.utils.parseEther("1.0"), // Sends exactly 1.0 ether
-        // });
-        // transactionHash = await owner.sendTransaction({
-        //   to: hardhatToken.address,
-        //   value: ethers.utils.parseEther("1.0"), // Sends exactly 1.0 ether
-        // });
-        await transfer(owner.address,hardhatToken.address,signer,ethers.utils.parseEther("1.0"))
-        await transfer(owner.address,hardhatToken.address,signer,ethers.utils.parseEther("1.0"))
-        await transfer(owner.address,hardhatToken.address,signer,ethers.utils.parseEther("1.0"))
-        let receiveAwardValue = await hardhatToken.awardMap(0);
-        console.log("receive:%d",receiveAwardValue)
-        blockNum = await ethers.provider.getBlockNumber();
-        console.log("block:%d",blockNum)
-        const contractBalance2 = await ethers.provider.getBalance(hardhatToken.address)
-        console.log("token balance:%s",contractBalance2);
-        // await hardhatToken.setCacheAddress(addr1.address);
-        let userAddrs = [[addr2.address,addr3.address],[],[],[],[]];
-        await hardhatToken.award(userAddrs);
+      //   const contractBalance2 = await ethers.provider.getBalance(addr2.address)
+      //   console.log("addr2 balance:%s",contractBalance2);
+      //   const contractBalance3 = await ethers.provider.getBalance(addr3.address)
+      //   console.log("addr3 balance:%s",contractBalance3);
+      //   const contractBalance4 = await ethers.provider.getBalance(addr4.address)
+      //   console.log("addr4 balance:%s",contractBalance4);
+      //   const contractBalance5 = await ethers.provider.getBalance(addr5.address)
+      //   console.log("addr5 balance:%s",contractBalance5);
+      //   const cycle = await hardhatToken.cycle() - 1;
+      //   console.log("cycle:%s",cycle);
+      //   const awardMap = await hardhatToken.awardMap(cycle);
+      //   console.log("token balance:%s",awardMap);
+      // });
+      // it("award2", async function () {
+      //   const { hardhatToken, owner, addr1, addr2,addr3 } = await loadFixture(deployTokenFixture);
+      //   const signer = await ethers.provider.getSigner()
+      //   await ethers.provider.send("hardhat_setBalance", [
+      //     addr2.address,
+      //     "0x0",
+      //   ]);
+      //   await ethers.provider.send("hardhat_setBalance", [
+      //     addr3.address,
+      //     "0x0",
+      //   ]);
+      //   await hardhatToken.setStartAwardBlockNumber(1);
+      //   await hardhatToken.setCycleAwardBlockNumber(4);
+      //   // let transactionHash = await owner.sendTransaction({
+      //   //   to: hardhatToken.address,
+      //   //   value: ethers.utils.parseEther("1.0"), // Sends exactly 1.0 ether
+      //   // });
+      //   // transactionHash = await owner.sendTransaction({
+      //   //   to: hardhatToken.address,
+      //   //   value: ethers.utils.parseEther("1.0"), // Sends exactly 1.0 ether
+      //   // });
+      //   // transactionHash = await owner.sendTransaction({
+      //   //   to: hardhatToken.address,
+      //   //   value: ethers.utils.parseEther("1.0"), // Sends exactly 1.0 ether
+      //   // });
+      //   await transfer(owner.address,hardhatToken.address,signer,ethers.utils.parseEther("1.0"))
+      //   await transfer(owner.address,hardhatToken.address,signer,ethers.utils.parseEther("1.0"))
+      //   await transfer(owner.address,hardhatToken.address,signer,ethers.utils.parseEther("1.0"))
+      //   let receiveAwardValue = await hardhatToken.awardMap(0);
+      //   console.log("receive:%d",receiveAwardValue)
+      //   blockNum = await ethers.provider.getBlockNumber();
+      //   console.log("block:%d",blockNum)
+      //   const contractBalance2 = await ethers.provider.getBalance(hardhatToken.address)
+      //   console.log("token balance:%s",contractBalance2);
+      //   // await hardhatToken.setCacheAddress(addr1.address);
+      //   let userAddrs = [[addr2.address,addr3.address],[],[],[],[]];
+      //   await hardhatToken.award(userAddrs);
 
-        const contractBalance3 = await ethers.provider.getBalance(addr2.address)
-        console.log("addr2  balance:%s",contractBalance3);
-        const contractBalance4 = await ethers.provider.getBalance(addr3.address)
-        console.log("addr3  balance:%s",contractBalance4);
-        const cycle = await hardhatToken.cycle();
-        let awardMap = await hardhatToken.awardMap(cycle-1);
-        console.log("cycle:%s reward:%s",cycle-1,awardMap);
-        awardMap = await hardhatToken.awardMap(cycle);
-        console.log("cycle:%s reward:%s",cycle,awardMap);
-      });
+      //   const contractBalance3 = await ethers.provider.getBalance(addr2.address)
+      //   console.log("addr2  balance:%s",contractBalance3);
+      //   const contractBalance4 = await ethers.provider.getBalance(addr3.address)
+      //   console.log("addr3  balance:%s",contractBalance4);
+      //   const cycle = await hardhatToken.cycle();
+      //   let awardMap = await hardhatToken.awardMap(cycle-1);
+      //   console.log("cycle:%s reward:%s",cycle-1,awardMap);
+      //   awardMap = await hardhatToken.awardMap(cycle);
+      //   console.log("cycle:%s reward:%s",cycle,awardMap);
+      // });
       it("balance", async function () {
         const { hardhatToken, owner, addr1, addr2,addr3 } = await loadFixture(deployTokenFixture);
         let transactionHash = await owner.sendTransaction({

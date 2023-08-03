@@ -111,7 +111,9 @@ const {
         leafNodes =[];
         const addr1Str = addr1.address
         const addr2Str = addr2.address
+        console.log(addr1Str);
         leafNodes[0] = ethers.utils.solidityKeccak256( ['address', 'uint','uint256'], [addr1Str, 1,1])
+        console.log(leafNodes[0]);
         leafNodes[1] = ethers.utils.solidityKeccak256( ['address', 'uint','uint256'], [addr2Str, 1,2])
         // 生成树根
         const tree = new (require('merkletreejs').MerkleTree)(leafNodes, require('keccak256'), {sortPairs: true});

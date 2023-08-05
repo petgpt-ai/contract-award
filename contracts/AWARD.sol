@@ -54,7 +54,7 @@ contract AWARD is  Ownable   {
         cycle += 1;
     }
 
-    function claim(uint catId,uint256 amount,bytes32[] memory proof)public{
+    function claim(uint catId,uint256 amount,bytes32[] memory proof)public returns(bool){
         uint curCycle = cycle-1;
         bytes32 merkleRoot_ = merkleRootMap[curCycle];
         bytes32 leaf = keccak256(abi.encodePacked(msg.sender, catId, amount));
@@ -68,7 +68,9 @@ contract AWARD is  Ownable   {
 
             payable(msg.sender).transfer(amount);
             catAwardMap[curCycle][catId] = amount;
+            return true;
         }
+        return false;
     }
     
 

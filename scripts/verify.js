@@ -10,7 +10,7 @@ async function main() {
     }
   
     await run(`verify:verify`, {
-        address: '0xA07581095Ac97113Cc9b7C0ED73b104eBFe77328',
+        address: '0x31dECeA9ab4100aa16378d0BbCcc939d024259d3',
         constructorArguments: [],
     });
   }

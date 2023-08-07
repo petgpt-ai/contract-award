@@ -24,7 +24,6 @@ contract AWARD is  Ownable   {
         startAwardBlockNumber = 0;
     }
     function setCycle(uint inCycle)public onlyOwner{
-        require(inCycle != 0, "cycle number not 0");
         cycle = inCycle;
     }
 

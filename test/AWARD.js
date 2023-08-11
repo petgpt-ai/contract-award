@@ -107,17 +107,40 @@ const {
         
 
         const { hardhatToken, owner, addr1, addr2,addr3,addr4,addr5 } = await loadFixture(deployTokenFixture);
-
+        // const testValue = ethers.utils.solidityKeccak256( ['address', 'uint','uint256'], ['0x44ebBb1fcD24189B18114b03D300bF596186991B', 19,1980198019801980])
+        // console.log("testValue",testValue);
         leafNodes =[];
-        const addr1Str = addr1.address
-        const addr2Str = addr2.address
-        console.log(addr1Str);
-        leafNodes[0] = ethers.utils.solidityKeccak256( ['address', 'uint','uint256'], [addr1Str, 1,1])
-        console.log(leafNodes[0]);
-        leafNodes[1] = ethers.utils.solidityKeccak256( ['address', 'uint','uint256'], [addr2Str, 1,2])
+        // const addr1Str = addr1.address
+        // const addr2Str = addr2.address
+        // console.log(addr1Str);
+        
+        // console.log(leafNodes[0]);
+        
+        leafNodes[0] = ethers.utils.solidityKeccak256( ['address', 'uint','uint256'], [addr1.address.toLowerCase(), 9,4210526315789473])
+        leafNodes[1] = ethers.utils.solidityKeccak256( ['address', 'uint','uint256'], [addr1.address.toLowerCase(), 10,5789473684210526])
+        leafNodes.push("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
+        // leafNodes[2] = ethers.utils.solidityKeccak256( ['address', 'uint','uint256'], ['0x44ebBb1fcD24189B18114b03D300bF596186991B', 2,1980198019801980])
+        // leafNodes[3] = ethers.utils.solidityKeccak256( ['address', 'uint','uint256'], ['0x44ebBb1fcD24189B18114b03D300bF596186991B', 9,1980198019801980])
+        // leafNodes[4] = ethers.utils.solidityKeccak256( ['address', 'uint','uint256'], ['0x44ebBb1fcD24189B18114b03D300bF596186991B', 19,1980198019801980])
+        // leafNodes[5] = ethers.utils.solidityKeccak256( ['address', 'uint','uint256'], ['0x44ebBb1fcD24189B18114b03D300bF596186991B', 4,99009900990099])
+        // leafNodes[6] = ""
+
+        // leafNodes[0] = "74cb6862ed38a5de7c1982993e675a8c691d559b6aa48c5bde6761de4083ddd8"
+        // leafNodes[1] = "025a1b68d6f07ffc1d4a7226ca8533195ebdabc9684fc1d01a9479af1b3dd1db"
+        // leafNodes.push("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
+        // leafNodes[2] = "aab0cb813ea3a982d24bb893c50feb29fbb890bdc43109e3f8bd60bb69ac2671"
+        // leafNodes[3] = "3a52ab2c900bbf9db719479f9fe997ac0104487435c811899b4a6f6c95aa7a6c"
+        // leafNodes[4] = "3d3c7c0cdc5461ac8f695a97cd0a1fd26c2c22af6bfd3ab96207122b12fcb250"
+        // leafNodes[5] = "536b6c9bd7fbb5ad5858adc23f6d0462a8fb995ddd8060a3b72c9134384ce0d2"
+        // leafNodes[6] = ""
+        // leafNodes[0] = ""
+        console.log("leafNodes:",leafNodes)
         // 生成树根
         const tree = new (require('merkletreejs').MerkleTree)(leafNodes, require('keccak256'), {sortPairs: true});
-
+        const data = tree.getHexRoot();
+        console.log("root:",data)
+        
+        
         await hardhatToken.setStartAwardBlockNumber(1);
         
         await hardhatToken.setCycleAwardBlockNumber(2);
@@ -125,12 +148,16 @@ const {
         console.log("token balance:%s",contractBalance);
         // 
         
-        const data = tree.getHexRoot();
+        
         await hardhatToken.score(data)
         
-        const proof = tree.getHexProof(leafNodes[0])
+        const proof = tree.getHexProof(leafNodes[1])
         console.log("proof:"+proof)
-        await hardhatToken.connect(addr1).claim(1,1,proof)
+        console.log("address:",addr1.address.toLowerCase())
+        let verifyRet = tree.verify(proof,leafNodes[1],data)
+        console.log(verifyRet)
+        await hardhatToken.connect(addr1).claim(10,5789473684210526,proof)
+
       })
       // it("award0", async function () {
       //   const { hardhatToken, owner, addr1, addr2,addr3,addr4,addr5 } = await loadFixture(deployTokenFixture);

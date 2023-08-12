@@ -9,7 +9,6 @@ import "hardhat/console.sol";
 
 contract AWARD is  Ownable   {
     uint public cycle;
-    uint public awardRankSize;
     uint256 public cycleAwardBlockNumber;
     uint256 public startAwardBlockNumber;
     mapping(uint256 => uint256) public awardMap;
@@ -19,7 +18,6 @@ contract AWARD is  Ownable   {
     constructor() {      
         // __Ownable_init();
         cycle = 0;
-        awardRankSize = 5;
         cycleAwardBlockNumber = 0;
         startAwardBlockNumber = 0;
     }
@@ -27,10 +25,6 @@ contract AWARD is  Ownable   {
         cycle = inCycle;
     }
 
-    function setAwardRankSize(uint inAwardRankSize)public onlyOwner{
-        require(inAwardRankSize != 0, "award size number not 0");
-        awardRankSize = inAwardRankSize;
-    }
 
     function setStartAwardBlockNumber(uint256 blockNumber)public onlyOwner{
         require(blockNumber != 0, "award block number not 0");

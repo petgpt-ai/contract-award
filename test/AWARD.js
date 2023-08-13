@@ -65,11 +65,6 @@ const {
       //   console.log("cacheAddress2:%s",cacheAddress2)
         
       // });
-      it("setCycle", async function () {
-        const { hardhatToken, owner, addr1, addr2,addr3 } = await loadFixture(deployTokenFixture);
-        const cycle =await hardhatToken.cycle();
-        console.log("cycle:%s",cycle)
-      });
       it("transfer", async function () {
         const { hardhatToken, owner, addr1, addr2,addr3 } = await loadFixture(deployTokenFixture);
         const signer = await ethers.provider.getSigner()
@@ -142,14 +137,19 @@ const {
         
         
         await hardhatToken.setStartAwardBlockNumber(1);
-        
+        await hardhatToken.setStartAwardBlockNumber(1);
+        await hardhatToken.setStartAwardBlockNumber(1);
+        await hardhatToken.setCycleAwardBlockNumber(2);
         await hardhatToken.setCycleAwardBlockNumber(2);
         const contractBalance = await ethers.provider.getBalance(hardhatToken.address);
         console.log("token balance:%s",contractBalance);
         // 
+        const cycle = await hardhatToken.getCycle();
+        console.log("cycle:%d",cycle);
+        blockNum = await ethers.provider.getBlockNumber();
+        console.log("block:%d",blockNum)
         
-        
-        await hardhatToken.score(data)
+        await hardhatToken.score(data,cycle)
         
         const proof = tree.getHexProof(leafNodes[1])
         console.log("proof:"+proof)
@@ -287,12 +287,6 @@ const {
         });
         const balance = await hardhatToken.getContractsBalance();
         console.log("balance:%s",balance);
-      });
-      it("cycle", async function () {
-        const { hardhatToken, owner, addr1, addr2,addr3 } = await loadFixture(deployTokenFixture);
-        await hardhatToken.setCycle(1);
-        let awardMap = await hardhatToken.awardMap(0);
-        console.log("cycle:0 reward:%d",awardMap);
       });
     });
   });

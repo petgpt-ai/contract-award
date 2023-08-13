@@ -8,7 +8,6 @@ import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "hardhat/console.sol";
 
 contract AWARD is  Ownable   {
-    uint public cycle;
     uint256 public cycleAwardBlockNumber;
     uint256 public startAwardBlockNumber;
     mapping(uint256 => uint256) public awardMap;
@@ -17,12 +16,8 @@ contract AWARD is  Ownable   {
 
     constructor() {      
         // __Ownable_init();
-        cycle = 0;
         cycleAwardBlockNumber = 0;
         startAwardBlockNumber = 0;
-    }
-    function setCycle(uint inCycle)public onlyOwner{
-        cycle = inCycle;
     }
 
 
@@ -38,17 +33,16 @@ contract AWARD is  Ownable   {
         cycleAwardBlockNumber = blockNumber;
     }
 
-    function score(bytes32 tmerkleRoot)public onlyOwner{
+    function score(bytes32 tmerkleRoot,uint cycle)public onlyOwner{
         require(startAwardBlockNumber > 0 ,"startAwardBlockNumber is 0");
         require(cycleAwardBlockNumber > 0 ,"cycleAwardBlockNumber is 0");
         // console.log("%d %d %d",block.number,startAwardBlockNumber,cycleAwardBlockNumber);
         require(block.number >= startAwardBlockNumber + (cycle +1) * cycleAwardBlockNumber,"awards block not reach");
         merkleRootMap[cycle] = tmerkleRoot;
-        cycle += 1;
     }
 
     function claim(uint catId,uint256 amount,bytes32[] memory proof)public returns(bool){
-        uint curCycle = cycle-1;
+        uint curCycle = getCycle()-1;
         bytes32 merkleRoot_ = merkleRootMap[curCycle];
         bytes32 leaf = keccak256(abi.encodePacked(msg.sender, catId, amount));
         require(MerkleProof.verify(proof, merkleRoot_ , leaf),"merkle proof verify error");
@@ -80,28 +74,24 @@ contract AWARD is  Ownable   {
         return block.number;
     }
     
-    function getCurCycleByBlockNumber()public view returns(uint256){
-        uint256 tmpAwardBlockNumber = block.number - startAwardBlockNumber; 
-        if(tmpAwardBlockNumber < 0){
+
+    function getCycle()public view returns(uint256){
+         if(startAwardBlockNumber == 0||cycleAwardBlockNumber ==0){
             return 0;
+        }else{
+            uint256 tmpAwardBlockNumber = block.number - startAwardBlockNumber;
+            if(tmpAwardBlockNumber < 0){
+                return 0;
+            }
+            uint256 cycleNum = tmpAwardBlockNumber / cycleAwardBlockNumber;
+            return cycleNum;
         }
-        uint256 cycleNum = tmpAwardBlockNumber / cycleAwardBlockNumber;
-        return cycleNum;
     }
 
     receive() external payable{
         require(msg.value >= 0, "receive is 0");
-        if(startAwardBlockNumber == 0||cycleAwardBlockNumber ==0){
-            awardMap[cycle] += msg.value ;
-        }else{
-            uint256 tmpAwardBlockNumber = block.number - startAwardBlockNumber;
-            if(tmpAwardBlockNumber < 0){
-                return;
-            }
-            uint256 cycleNum = tmpAwardBlockNumber / cycleAwardBlockNumber;
-            // console.log("recv:%d val:%d t:%d",cycleNum,msg.value,tmpAwardBlockNumber);
-            awardMap[cycleNum] += msg.value;
-        }
+        uint256 curCycle = getCycle();
+        awardMap[curCycle] += msg.value;
     }
 
     fallback() external payable{}

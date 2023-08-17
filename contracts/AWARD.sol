@@ -1,42 +1,39 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.8;
 
-// import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-// import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
-import "hardhat/console.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 
-contract AWARD is  Ownable   {
+contract AWARD is AccessControl  {
     uint256 public cycleAwardBlockNumber;
     uint256 public startAwardBlockNumber;
     mapping(uint256 => uint256) public awardMap;
     mapping(uint => bytes32) public merkleRootMap;
     mapping(uint => mapping(uint => uint256)) public catAwardMap;
 
+    bytes32 public constant SCORE_ROLE = keccak256("SCORE_ROLE");
+
     constructor() {      
         // __Ownable_init();
         cycleAwardBlockNumber = 0;
         startAwardBlockNumber = 0;
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
 
-    function setStartAwardBlockNumber(uint256 blockNumber)public onlyOwner{
+    function setStartAwardBlockNumber(uint256 blockNumber)public onlyRole(DEFAULT_ADMIN_ROLE) {
         require(blockNumber != 0, "award block number not 0");
-        // console.log("b:%d b:%d",blockNumber,block.number);
-        // require(blockNumber > block.number, "award block <= cur block number");
         startAwardBlockNumber = blockNumber;
     }
 
-    function setCycleAwardBlockNumber(uint256 blockNumber)public onlyOwner{
+    function setCycleAwardBlockNumber(uint256 blockNumber)public onlyRole(DEFAULT_ADMIN_ROLE) {
         require(blockNumber != 0, "award block number not 0");
         cycleAwardBlockNumber = blockNumber;
     }
 
-    function score(bytes32 tmerkleRoot,uint cycle)public onlyOwner{
+    function score(bytes32 tmerkleRoot,uint cycle)public onlyRole(SCORE_ROLE) {
         require(startAwardBlockNumber > 0 ,"startAwardBlockNumber is 0");
         require(cycleAwardBlockNumber > 0 ,"cycleAwardBlockNumber is 0");
-        // console.log("%d %d %d",block.number,startAwardBlockNumber,cycleAwardBlockNumber);
         require(block.number >= startAwardBlockNumber + (cycle +1) * cycleAwardBlockNumber,"awards block not reach");
         merkleRootMap[cycle] = tmerkleRoot;
     }
@@ -47,15 +44,12 @@ contract AWARD is  Ownable   {
         bytes32 leaf = keccak256(abi.encodePacked(msg.sender, catId, amount));
         require(MerkleProof.verify(proof, merkleRoot_ , leaf),"merkle proof verify error");
         uint256 awardAmount = catAwardMap[curCycle][catId];
-        // console.logBytes32(merkleRoot_);
-        // console.logBytes32(leaf);
         if (MerkleProof.verify(proof, merkleRoot_, leaf) && awardAmount == 0){
             uint256 receiveAwardValue = awardMap[curCycle];
             address contractsAddress = address(this);
             uint256 balance = contractsAddress.balance;
             require(balance != 0, "address balance is 0");
             require(balance >= receiveAwardValue, "balance < award amount");
-
             payable(msg.sender).transfer(amount);
             catAwardMap[curCycle][catId] = amount;
             return true;
@@ -76,7 +70,7 @@ contract AWARD is  Ownable   {
     
 
     function getCycle()public view returns(uint256){
-         if(startAwardBlockNumber == 0||cycleAwardBlockNumber ==0){
+        if(startAwardBlockNumber == 0||cycleAwardBlockNumber ==0){
             return 0;
         }else{
             uint256 tmpAwardBlockNumber = block.number - startAwardBlockNumber;
@@ -96,7 +90,7 @@ contract AWARD is  Ownable   {
 
     fallback() external payable{}
 
-    function withdraw() external onlyOwner {
+    function withdraw() external onlyRole(DEFAULT_ADMIN_ROLE) {
         (bool success, ) = payable(msg.sender).call{
             value: address(this).balance
         }("");
